@@ -1,0 +1,11 @@
+{
+    "name": "em-racer-phonebook"
+  , "version": "0.1.1"
+  , "private": true
+  , "dependencies": {
+      "express": "2.5.8",
+      "jade": ">= 0.0.1",
+      "racer": "0.1.9",
+      "redis": ">= 0.7.1"
+  }
+}

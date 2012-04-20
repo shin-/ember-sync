@@ -1,0 +1,28 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+label {
+    padding: 5px 5px;
+}
+
+#contacts {
+    float: right;
+}
+
+#clist li {
+    padding: 5px;
+    margin: 5px 0px;
+    background-color: #ddd;
+    list-style-type: none;
+}
+
+.del {
+    float: right;
+    display: block;
+}

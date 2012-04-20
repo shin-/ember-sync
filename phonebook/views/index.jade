@@ -1,0 +1,40 @@
+script(type="text/x-handlebars", data-template-name="contact-display")
+        {{#each contacts}}<li class="well"><div class="offset3 span2">{{editButton _id}} {{delButton _id}}</div><h3>{{firstName}} {{lastName}}</h3><p>Birthday: {{nicedate}} ({{age}})<br/>Twitter: <a {{bindAttr href="twitUrl"}}>@{{twitter}}</a><br/>E-mail: <a {{bindAttr href="mailto"}}>{{email}}</a></p><h4>Phone</h4><ul><li>{{phone.homePhone}}</li><li>{{phone.workPhone}}</li><li>{{phone.mobilePhone}}</li></ul></li>{{/each}}
+h1.navbar= title
+div.row-fluid
+    div#contacts.span8
+        h2 Contacts
+        ul(class="unstyled span5")#clist
+    form#new.span4
+        h2 New contact
+        input#cid(type='hidden')
+        label(for='fname') First name: 
+        input#fname(type='text').span2
+        label(for='lname') Last name: 
+        input#lname(type='text').span2
+        label(for='bmonth') Birth date (mm/dd/yyyy): 
+        input#bmonth(type='text').span1
+        | /
+        input#bday(type='text').span1
+        | /
+        input#byear(type='text').span1
+        label(for='twit') Twitter: 
+        input#twit(type='text').span2
+        label(for='mail') E-mail: 
+        input#mail(type='text').span2
+        h3 Phone numbers
+        label(for='hphone') Home: 
+        input#hphone(type='text').span2
+        label(for='wphone') Work: 
+        input#wphone(type='text').span2
+        label(for='mphone') Mobile: 
+        input#mphone(type='text').span2
+        br
+        button.btn.btn-success
+            i.icon-plus.icon-white
+            |  Create
+        span
+        |  
+        button(id='updateButton').btn.btn-primary
+            i.icon-retweet.icon-white
+            |  Update
