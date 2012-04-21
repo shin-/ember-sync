@@ -1,5 +1,5 @@
 script(type="text/x-handlebars", data-template-name="contact-display")
-        {{#each contacts}}<li class="well"><div class="offset3 span2">{{editButton _clientId}} {{delButton _id}}</div><h3>{{firstName}} {{lastName}}</h3><p>Birthday: {{nicedate}} ({{age}})<br/>Twitter: <a {{bindAttr href="twitUrl"}}>@{{twitter}}</a><br/>E-mail: <a {{bindAttr href="mailto"}}>{{email}}</a></p><h4>Phone</h4><ul><li>{{phone.homePhone}}</li><li>{{phone.workPhone}}</li><li>{{phone.mobilePhone}}</li></ul></li>{{/each}}
+        {{#each contacts}}<li class="well"><div class="offset3 span2">{{editButton _clientId}} {{delButton _clientId}}</div><h3>{{firstName}} {{lastName}}</h3><p>Birthday: {{nicedate}} ({{age}})<br/>Twitter: <a {{bindAttr href="twitUrl"}}>@{{twitter}}</a><br/>E-mail: <a {{bindAttr href="mailto"}}>{{email}}</a></p><h4>Phone</h4><ul><li>{{phone.homePhone}}</li><li>{{phone.workPhone}}</li><li>{{phone.mobilePhone}}</li></ul></li>{{/each}}
 h1.navbar= title
 div.row-fluid
     div#contacts.span8
