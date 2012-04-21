@@ -81,7 +81,7 @@ $(window).ready(function() {
         var birth = new Date($('#byear').val(), $('#bmonth').val() - 1, $('#bday').val());
         var id = parseInt($('#cid').val());
         var contact = {
-            _id: id,
+            _clientId: id,
             firstName: $('#fname').val(),
             lastName: $('#lname').val(),
             twitter: $('#twit').val(),
@@ -109,14 +109,14 @@ $(racer.ready(function(model) {
 
 function del(id) {
     id = (typeof id == 'string') ? parseInt(id) : id;
-    var obj = AddressBook.contacts.findProperty('_id', id);
+    var obj = AddressBook.contacts.findProperty('_clientId', id);
     AddressBook.contacts.removeObject(obj);
     return false;
 }
 
 function edit(id) {
     id = (typeof id == 'string') ? parseInt(id) : id;
-    var obj = AddressBook.contacts.findProperty('_id', id);
+    var obj = AddressBook.contacts.findProperty('_clientId', id);
     $('#cid').val(id);
     $('#fname').val(obj.get('firstName'));
     $('#lname').val(obj.get('lastName'));

@@ -32,9 +32,9 @@ var DM = {
             var modelColl = racerModel.get(racerPath);
 
             for (var i = removed.length - 1; i >= 0; i--) {
-                var id = removed.objectAt(i).get('_id');
+                var id = removed.objectAt(i).get('_clientId');
                 for (var j = modelColl.length - 1; j >= 0; j--) {
-                    if (modelColl[j]._id == id) {
+                    if (modelColl[j]._clientId == id) {
                         racerModel.pass('ignore').remove(racerPath, j);
                         break;
                     }
@@ -50,9 +50,9 @@ var DM = {
             var modelColl = racerModel.get(racerPath);
             if (removed === null && added.length === 1) {
                 // Update
-                var id = added.objectAt(0).get('_id');
+                var id = added.objectAt(0).get('_clientId');
                 for (var i = modelColl.length - 1; i >= 0; i--) {
-                    if (modelColl[i]._id == id) {
+                    if (modelColl[i]._clientId == id) {
                         racerModel.pass('ignore').set(racerPath + '.' + i, 
                             added.objectAt(0).getJSON());
                         return;
@@ -63,7 +63,7 @@ var DM = {
             for (var i = added.length - 1; i >= 0; i--) {
                 var clientId = ++DM._idCount,
                     obj = added.objectAt(i);
-                obj.set('_id', clientId);
+                obj.set('_clientId', clientId);
                 racerModel.pass('ignore').push(racerPath, obj.getJSON());
             }
         }
@@ -80,7 +80,7 @@ var DM = {
         var racerColl = racerModel.get(racerPath);
         if (!racerColl || racerColl.length <= 0) return;
         for (var i = 0, l = racerColl.length; i < l; i++) {
-            racerColl[i]._id = ++this._idCount;
+            racerColl[i]._clientId = ++this._idCount;
             emColl.pushObject(type.create(racerColl[i]));
         }
     },
@@ -106,8 +106,8 @@ var DM = {
             function(index, obj, out, isLocal, passed) {
                 if (passed == 'ignore') return;
                 // This should not evaluate to true ever.
-                if (obj._id == null && obj._id !== 0) return;
-                var item = emColl.findProperty('_id', obj._id);
+                if (obj._clientId == null && obj._clientId !== 0) return;
+                var item = emColl.findProperty('_clientId', obj._clientId);
                 // Since we don't use update() the enumerable observer won't be fired.
                 // This behavior is desired.
                 item && item.setProperties(obj);
@@ -115,17 +115,29 @@ var DM = {
         
         racerModel.on('push', racerPath, function(obj, out, isLocal, passed) {
             if (passed == 'ignore') return;
-            obj._id = ++DM._idCount;
+            obj._clientId = ++DM._idCount;
             emColl.addObject(type.create(obj), true);
         });
-        
+
+        racerModel.on('insert', racerPath, function(index, item, out, isLocal, passed) {
+            if (passed == 'ignore') return;
+            obj._clientId = ++DM._idCount;
+            emColl.addObject(type.create(obj), true);
+        });
+
+        racerModel.on('unshift', racerPath, function(item, out, isLocal, passed) {
+            if (passed == 'ignore') return;
+            obj._clientId = ++DM._idCount;
+            emColl.addObject(type.create(obj), true);
+        });
+
         racerModel.on('remove', racerPath, 
             function(index, num, removed, isLocal, passed) {
                 if (passed == 'ignore') return;
                 for (var i = removed.length - 1; i >= 0; i--) {
                     var obj = removed[i];
-                    if (obj._id == null && obj._id !== 0) continue;
-                    var item = emColl.findProperty('_id', removed[i]._id);
+                    if (obj._clientId == null && obj._clientId !== 0) continue;
+                    var item = emColl.findProperty('_clientId', removed[i]._clientId);
                     emColl.removeObject(item, true);
                 }
             });
@@ -237,6 +249,56 @@ DM.Object.reopenClass({
         return result;
     }
 });
+
+
+DM.Array = Ember.Object.extend({
+    _racerModel: null,
+    _racerPath: null,
+    _type: null,
+    replace: function(idx, amt, objects) {
+        this.arrayContentWillChange(idx, amt, objects ? objects.length : 0)
+        if (amt > 0) {
+            this._racerModel.remove(this._racerPath, idx, amt);
+        }
+
+        if (objects && objects.length > 0) {
+            this._racerModel.insert.apply(this._racerModel, [this._racerPath, idx].concat(objects));    
+        }
+        this.arrayContentDidChange(idx, amt, objects ? objects.length : 0);
+    },
+    popObject: function() {
+        return this._racerModel.pop(this._racerPath);
+    },
+    pushObject: function(item) {
+        return this._racerModel.push(this._racerPath, item);
+    },
+    pushObjects: function(items) {
+        var args = items.filter(function() { return true; });
+        args.unshift(this._racerPath);
+        return this._racerModel.push.apply(this._racerModel, args);
+    },
+    shiftObject: function() {
+        return this._racerModel.shift(this._racerPath);
+    },
+    unshiftObject: function(item) {
+        return this._racerModel.unshift(this._racerPath, item);
+    },
+    unshiftObjects: function(items) {
+        var args = items.filter(function() { return true; });
+        args.unshift(this._racerPath);
+        return this._racerModel.unshift.apply(this._racerModel, args);
+    }
+});
+
+DM.Array.reopenClass({
+    create: function(racerModel, racerPath) {
+        var result = this._super();
+        result._racerModel = racerModel,
+        result._racerPath = racerPath;
+        return result;
+    }
+})
+
 /**
  * Modify Ember.Enumerable to add an update() method that allows to make changes to
  * one item in the Enumerable and notify the change to observers.
@@ -244,7 +306,7 @@ DM.Object.reopenClass({
 Ember.Enumerable.reopen({
     update: function(obj, f) {
         if (typeof obj !== "object") {
-            obj = this.findProperty('_id', obj);
+            obj = this.findProperty('_clientId', obj);
         }
         if (!obj) {
             return;
@@ -300,7 +362,7 @@ Ember.MutableArray.reopen({
 var ArrayAugmentMixin = Ember.Mixin.create({
     update: function(obj, f) {
         if (typeof obj !== "object") {
-            obj = this.findProperty('_id', obj);
+            obj = this.findProperty('_clientId', obj);
         }
         if (!obj) {
             return;
